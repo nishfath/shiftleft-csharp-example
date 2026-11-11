@@ -528,6 +528,7 @@ function ValidationSummaryOnSubmit(validationGroup) {
                 summary.innerHTML = s;
                 window.scrollTo(0,0);
             }
+            // Replaced alert() with custom modal dialog to improve UX and security
             if (summary.showmessagebox == "True") {
                 s = "";
                 if (typeof(summary.headertext) == "string") {
@@ -556,9 +557,60 @@ function ValidationSummaryOnSubmit(validationGroup) {
                         }
                     }
                 }
-                alert(s);
+                // Create custom modal dialog instead of using alert()
+                showValidationModal(s);
             }
         }
+    }
+}
+
+// Helper function to display validation messages in a custom modal
+function showValidationModal(message) {
+    // Check if modal already exists, if so remove it
+    var existingModal = document.getElementById('validationModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Create modal overlay
+    var modalOverlay = document.createElement('div');
+    modalOverlay.id = 'validationModal';
+    modalOverlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:10000;display:flex;align-items:center;justify-content:center;';
+    
+    // Create modal content container
+    var modalContent = document.createElement('div');
+    modalContent.style.cssText = 'background:white;padding:20px;border-radius:5px;max-width:500px;max-height:80vh;overflow:auto;box-shadow:0 4px 6px rgba(0,0,0,0.3);';
+    
+    // Create message container with proper escaping to prevent XSS
+    var messageContainer = document.createElement('div');
+    messageContainer.style.cssText = 'margin-bottom:20px;white-space:pre-wrap;word-wrap:break-word;';
+    messageContainer.textContent = message; // Use textContent to prevent XSS
+    
+    // Create close button
+    var closeButton = document.createElement('button');
+    closeButton.textContent = 'OK';
+    closeButton.style.cssText = 'padding:8px 20px;background:#007bff;color:white;border:none;border-radius:3px;cursor:pointer;';
+    closeButton.onclick = function() {
+        modalOverlay.remove();
+    };
+    
+    // Assemble modal
+    modalContent.appendChild(messageContainer);
+    modalContent.appendChild(closeButton);
+    modalOverlay.appendChild(modalContent);
+    document.body.appendChild(modalOverlay);
+    
+    // Focus the close button for accessibility
+    closeButton.focus();
+    
+    // Allow ESC key to close modal
+    modalOverlay.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            modalOverlay.remove();
+        }
+    });
+}
+
     }
 }
 if (window.jQuery) {

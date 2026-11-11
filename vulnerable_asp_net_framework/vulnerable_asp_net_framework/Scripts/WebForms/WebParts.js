@@ -607,21 +607,34 @@ function WebPartManager_ProcessWebPartDrop() {
     return false;
 }
 function WebPartManager_ShowHelp(helpUrl, helpMode) {
+    // Hide menu if it exists
     if ((typeof(this.menu) != "undefined") && (this.menu != null)) {
         this.menu.Hide();
     }
+    
+    // Handle different help display modes
     if (helpMode == 0 || helpMode == 1) {
         if (helpMode == 0) {
+            // Modal dialog mode
             var dialogInfo = "edge: Sunken; center: yes; help: no; resizable: yes; status: no";
             window.showModalDialog(helpUrl, null, dialogInfo);
         }
         else {
-            window.open(helpUrl, null, "scrollbars=yes,resizable=yes,status=no,toolbar=no,menubar=no,location=no");
+            // New window mode - FIXED: Added noopener and noreferrer to prevent reverse tabnabbing
+            var newWindow = window.open(helpUrl, null, "scrollbars=yes,resizable=yes,status=no,toolbar=no,menubar=no,location=no,noopener,noreferrer");
+            
+            // Additional security measure: Clear opener reference if window was successfully opened
+            if (newWindow) {
+                newWindow.opener = null;
+            }
         }
     }
     else if (helpMode == 2) {
+        // Same window navigation
         window.location = helpUrl;
     }
+}
+
 }
 function WebPartManager_ExportWebPart(exportUrl, warn, confirmOnly) {
     if (warn == true && __wpmExportWarning.length > 0 && this.personalizationScopeShared != true) {
